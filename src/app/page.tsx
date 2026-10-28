@@ -1,32 +1,73 @@
+import Image from "next/image";
 import Link from "next/link";
-import ReferenceSquareSlideshow from "@/components/ReferenceSquareSlideshow";
+import EventCard from "@/components/EventCard";
+import HomeStage from "@/components/motion/HomeStage";
+import { closecallArtists, pastEvents, upcomingEvents } from "@/data/events";
+
+// Re-render hourly so events move from "upcoming" to "past" on their own.
+export const revalidate = 3600;
 
 export default function Homepage() {
+  const upcoming = upcomingEvents();
+  const past = pastEvents();
+  const artists = closecallArtists();
+
   return (
-    <section className="relative mx-auto flex min-h-screen w-full max-w-[1900px] flex-col justify-between px-6 py-8 md:px-12 md:py-10">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1 pt-1 text-black">
-          <a href="#" className="utility-link">/Sign up</a>
-          <a href="https://www.instagram.com/itsaclosecall/" target="_blank" rel="noreferrer" className="utility-link">/Instagram</a>
-          <a href="#" className="utility-link">/TikTok</a>
-          <a href="#" className="utility-link">/YouTube</a>
-          <a href="#" className="utility-link">/Soundcloud</a>
-        </div>
-        <button aria-label="Close" className="text-4xl leading-none">×</button>
-      </div>
+    <>
+      <HomeStage
+        events={upcoming.length ? upcoming : past.slice(0, 1)}
+        eventsLabel={upcoming.length ? "ADE 2026" : "Latest edition"}
+      />
 
-      <div className="flex flex-1 items-center justify-center py-8">
-        <ReferenceSquareSlideshow />
-      </div>
+      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-8">
+        {/* Upcoming */}
+        {upcoming.length > 0 && (
+          <section className="border-t border-ash py-[76px]">
+            <div className="mb-[30px] flex items-end justify-between gap-4">
+              <h2 className="display text-[34px] md:text-[70px]">Coming up</h2>
+              <p className="label">ADE 2026</p>
+            </div>
+            <div className="grid gap-[19px]">
+              {upcoming.map((event) => (
+                <EventCard key={event.day + event.title} event={event} upcoming />
+              ))}
+            </div>
+          </section>
+        )}
 
-      <div className="mx-auto w-full max-w-[520px] pb-4">
-        <div className="grid grid-cols-2 gap-x-16 gap-y-4 border-t border-black/70 pt-3 text-left">
-          <Link href="/music" className="block text-[24px] font-black uppercase leading-none tracking-[0.03em] md:text-[40px]">Records~</Link>
-          <Link href="/events" className="block text-[24px] font-black uppercase leading-none tracking-[0.03em] md:text-[40px]">Events~</Link>
-          <Link href="/about" className="block text-[24px] font-black uppercase leading-none tracking-[0.03em] md:text-[40px]">About~</Link>
-          <Link href="/contact" className="block text-[24px] font-black uppercase leading-none tracking-[0.03em] md:text-[40px]">Connect+</Link>
-        </div>
+        {/* Artists */}
+        <section className="py-[76px]">
+          <p className="label mb-[30px]">Played at CloseCall</p>
+          <ul className="plus-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            {artists.map((name) => (
+              <li key={name} className="flex aspect-[5/3] items-center justify-center p-3 text-center">
+                <span className="display text-[13px] leading-none md:text-[15px]">{name}</span>
+              </li>
+            ))}
+            <li className="flex aspect-[5/3] items-center justify-center">
+              <Image src="/brand/logos/closecall-diamond.png" alt="" width={1498} height={1488} className="h-[60%] w-auto" />
+            </li>
+          </ul>
+        </section>
+
+        {/* Events */}
+        <section className="py-[76px]">
+          <div className="mb-[30px] flex items-end justify-between gap-4">
+            <h2 className="display text-[34px] md:text-[70px]">Past events</h2>
+            <Link href="/events" className="pill">All events →</Link>
+          </div>
+          <div className="grid items-stretch gap-[19px] lg:grid-cols-2">
+            {past.map((event) => (
+              <EventCard key={event.day + event.title} event={event} />
+            ))}
+          </div>
+        </section>
+
+        {/* Sign-off */}
+        <section className="py-[76px]">
+          <Image src="/brand/logos/closecall-wordmark-fuzzy.png" alt="CloseCall" width={1600} height={193} className="h-auto w-full" />
+        </section>
       </div>
-    </section>
+    </>
   );
 }
